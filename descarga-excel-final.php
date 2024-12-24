@@ -174,7 +174,7 @@ $parametrosForm = [];
 
 //REALIZAMOS LA CONSULTA
 for($i = 0; $i < count($formulariosR);$i++){
-	$con1 = "SELECT display_meta FROM wp_rg_form_meta WHERE form_id = ".$formulariosR[$i];
+	$con1 = "SELECT display_meta FROM wp_gf_form_meta WHERE form_id = ".$formulariosR[$i];
 	$con2 = mysqli_query($conect, $con1);
 	while($con3 = mysqli_fetch_array($con2)){
 		//ARREGLO MOMENTANEO
@@ -283,7 +283,7 @@ $totalUsuario = [];
 
 //CONSULTAMOS SI ESTE FORMULARIO TIENE RELACION CON ALGUN PRODUCTO
 //$postForm;
-$fcon1 = "SELECT f.*, d.product AS product, d.product_hijo AS product_hijo, d.value AS value FROM wp_df_tags AS d, wp_rg_form AS f WHERE d.form = {$postForm} AND d.form = f.id AND f.is_active = '1' AND f.is_trash = '0' ";
+$fcon1 = "SELECT f.*, d.product AS product, d.product_hijo AS product_hijo, d.value AS value FROM {$wpdb->prefix}df_tags AS d, wp_gf_form AS f WHERE d.form = {$postForm} AND d.form = f.id AND f.is_active = '1' AND f.is_trash = '0' ";
 $fcon2 = mysqli_query($conect, $fcon1);
 $fcon3 = mysqli_fetch_array($fcon2);
 
@@ -501,7 +501,7 @@ for ($i=0; $i < count($datosForm); $i++) {
 
 							$atributo2 = utf8_encode($totalUsuario[$ij][1][$uj][1]);
 
-							$equipos1 = "SELECT * FROM wp_{$pos_red}_posts WHERE post_status = 'publish' AND post_type = 'sp_team' AND ID = '".$atributo2."' ";
+							$equipos1 = "SELECT * FROM {$wppd->prefix}{$pos_red}_posts WHERE post_status = 'publish' AND post_type = 'sp_team' AND ID = '".$atributo2."' ";
 							$equipos2 = mysqli_query($conect,$equipos1);
 							//$equipos3 = mysqli_fetch_array($equipos2);
 

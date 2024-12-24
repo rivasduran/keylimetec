@@ -899,7 +899,7 @@ function incripcion_all_form($entry, $form){
 
       //$idRed = 8;//ESTE ES EL ID DE LA SECCION DE INSCRIPCIONES PRO
       //PRIMERO REVISAMOS QUE ESTE FORMULARIO TENGA UN PRODUCTO ASIGNADO, SI NO ES ASI PROCEDEMOS A GUARDAR COMO SUB
-      $revP = $wpdb->get_results("SELECT f.*, d.product AS product, d.product_hijo AS product_hijo, d.value AS value FROM wp_df_tags AS d, wp_rg_form AS f WHERE d.form = {$idFormulario} AND d.form = f.id AND f.is_active = '1' AND f.is_trash = '0' ");
+      $revP = $wpdb->get_results("SELECT f.*, d.product AS product, d.product_hijo AS product_hijo, d.value AS value FROM {$wpdb->prefix}df_tags AS d, wp_gf_form AS f WHERE d.form = {$idFormulario} AND d.form = f.id AND f.is_active = '1' AND f.is_trash = '0' ");
       $saberSihay = 0;
       foreach ($revP as $keysz) {
         $saberSihay++;
@@ -961,7 +961,7 @@ function relacionEnviado($datosEnviados, $datosJugador, $idRed){
 
   //EN ESTE MODULO REVISAREMOS SI EL USUARIO TIENE ALGUN JUGADOR CREADO, SI NO LO TIENE CREADO PROCEDEMOS A CREARLO
   //$consultaJugador = $wpdb->get_results("SELECT pos.* FROM {$wpdb->prefix}posts AS pos WHERE pos.post_type = 'sp_player' AND pos.post_author = '".$user->ID."'");
-  $consultaJugador = $wpdb->get_results("SELECT pos.* FROM wp_{$idRed}_posts AS pos WHERE pos.post_type = 'sp_player' AND pos.post_author = '".$user->ID."'");
+  $consultaJugador = $wpdb->get_results("SELECT pos.* FROM {$wpdb->prefix}{$idRed}_posts AS pos WHERE pos.post_type = 'sp_player' AND pos.post_author = '".$user->ID."'");
   if(count($consultaJugador) > 0){
     foreach ($consultaJugador as $datos) {
       //echo "<h1>".$datos->ID."</h1>"; ESTOS SON LOS ID DE TODOS LOS JUGADORES QUE TIENE ESTE USUARIO
@@ -1039,21 +1039,21 @@ function agregaModificaMetrics($arregloMetrics = ""){
 
   //EN ESTE VAMOS A TRAER LOS DATOS DEL FORMULARIO
   //SACAMOS EL NOMBRE DEL USUARIO
-  $nombreSuser = $wpdb->get_results("SELECT display_meta FROM {$wpdb->prefix}rg_form_meta WHERE form_id = {$miFormulario} ");
+  $nombreSuser = $wpdb->get_results("SELECT display_meta FROM {$wpdb->prefix}gf_form_meta WHERE form_id = {$miFormulario} ");
 
   if(count($nombreSuser) > 0){
 
   }else{
     //FORMULARIO APERTURA 2018 SUB
-    $nombreSuser = $wpdb->get_results("SELECT display_meta FROM {$wpdb->prefix}rg_form_meta WHERE form_id = {$miFormulario2} ");
+    $nombreSuser = $wpdb->get_results("SELECT display_meta FROM {$wpdb->prefix}gf_form_meta WHERE form_id = {$miFormulario2} ");
     /*
     if (count($nombreSuser) > 0) {}else{
       //FORMULARIO CLAUSURA 2017
-      $nombreSuser = $wpdb->get_results("SELECT display_meta FROM {$wpdb->prefix}rg_form_meta WHERE form_id = {$miFormulario3} ");
+      $nombreSuser = $wpdb->get_results("SELECT display_meta FROM {$wpdb->prefix}gf_form_meta WHERE form_id = {$miFormulario3} ");
 
       if (count($nombreSuser) > 0) {}else{
         //FORMULARIO CLAUSURA 2017 SUB
-        $nombreSuser = $wpdb->get_results("SELECT display_meta FROM {$wpdb->prefix}rg_form_meta WHERE form_id = {$miFormulario4} ");
+        $nombreSuser = $wpdb->get_results("SELECT display_meta FROM {$wpdb->prefix}gf_form_meta WHERE form_id = {$miFormulario4} ");
       }
     }
     */
@@ -1262,6 +1262,8 @@ function agregaModificaMetrics_final($arregloMetrics = ""){
     $miFormulario = 18;
   }
 
+  //echo "<h1>------> {$miFormulario}</h1>";
+
   $seImporto = 0;
 
   //echo "<h1>{$miFormulario} {$wpdb->prefix}</h1>";
@@ -1286,21 +1288,21 @@ function agregaModificaMetrics_final($arregloMetrics = ""){
 
   //EN ESTE VAMOS A TRAER LOS DATOS DEL FORMULARIO
   //SACAMOS EL NOMBRE DEL USUARIO
-  $nombreSuser = $wpdb->get_results("SELECT display_meta FROM {$wpdb->prefix}rg_form_meta WHERE form_id = {$miFormulario} ");
+  $nombreSuser = $wpdb->get_results("SELECT display_meta FROM {$wpdb->prefix}gf_form_meta WHERE form_id = {$miFormulario} ");
 
   if(count($nombreSuser) > 0){
 
   }else{
     //FORMULARIO APERTURA 2018 SUB
-    $nombreSuser = $wpdb->get_results("SELECT display_meta FROM {$wpdb->prefix}rg_form_meta WHERE form_id = {$miFormulario2} ");
+    $nombreSuser = $wpdb->get_results("SELECT display_meta FROM {$wpdb->prefix}gf_form_meta WHERE form_id = {$miFormulario2} ");
     /*
     if (count($nombreSuser) > 0) {}else{
       //FORMULARIO CLAUSURA 2017
-      $nombreSuser = $wpdb->get_results("SELECT display_meta FROM {$wpdb->prefix}rg_form_meta WHERE form_id = {$miFormulario3} ");
+      $nombreSuser = $wpdb->get_results("SELECT display_meta FROM {$wpdb->prefix}gf_form_meta WHERE form_id = {$miFormulario3} ");
 
       if (count($nombreSuser) > 0) {}else{
         //FORMULARIO CLAUSURA 2017 SUB
-        $nombreSuser = $wpdb->get_results("SELECT display_meta FROM {$wpdb->prefix}rg_form_meta WHERE form_id = {$miFormulario4} ");
+        $nombreSuser = $wpdb->get_results("SELECT display_meta FROM {$wpdb->prefix}gf_form_meta WHERE form_id = {$miFormulario4} ");
       }
     }
     */
@@ -1403,10 +1405,11 @@ function agregaModificaMetrics_final($arregloMetrics = ""){
           }
 
           
-          $parametroMinuscula1 = str_replace(" ", "_", devuelveLabel($field_numberA));
+          $parametroMinuscula1 = str_replace(" ", "_", devuelveLabel($field_numberA, $datosForm[$i][0]));
+          //echo "<h1> ".$parametroE." = ".$parametroMinuscula1."</h1>";
           $parametroMinuscula = strtolower(sanear_string($parametroMinuscula1));
 
-          //echo "<h1>".$parametroMinuscula."</h1>";
+          //echo "<h1> ".$parametroE." = ".$parametroMinuscula."</h1>";
           //$parametroMinuscula = "nombre";
 
           add_filter( 'gform_field_value_'.$parametroMinuscula, function( $content ) use($parametroE) {
@@ -1420,6 +1423,8 @@ function agregaModificaMetrics_final($arregloMetrics = ""){
 
               //$author_email = get_the_author_meta( $parametro1, $post->post_author );
               //$author_email = get_the_author_meta( $parametro1, $atributoss->meta_value );
+
+              //echo "<h1></h1>";
 
               return $parametroE;
           });
@@ -1485,12 +1490,12 @@ function formularioSub($seImporto){
 
   //EN ESTE VAMOS A TRAER LOS DATOS DEL FORMULARIO
   //SACAMOS EL NOMBRE DEL USUARIO
-  $nombreSuser = $wpdb->get_results("SELECT display_meta FROM {$wpdb->prefix}rg_form_meta WHERE form_id = {$formularioPasado} ");
+  $nombreSuser = $wpdb->get_results("SELECT display_meta FROM {$wpdb->prefix}gf_form_meta WHERE form_id = {$formularioPasado} ");
 
   if(count($nombreSuser) > 0){
 
   }else{
-    $nombreSuser = $wpdb->get_results("SELECT display_meta FROM {$wpdb->prefix}rg_form_meta WHERE form_id = {$formularioPasado} ");
+    $nombreSuser = $wpdb->get_results("SELECT display_meta FROM {$wpdb->prefix}gf_form_meta WHERE form_id = {$formularioPasado} ");
   }
 
   //echo "SELECT value FROM wp_2_rg_lead_detail WHERE lead_id = ".$_GET['id']." AND form_id = 12 AND field_number = 1 ";

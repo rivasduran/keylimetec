@@ -75,7 +75,7 @@ function caja_usuarios_rela(){
 }
 
 //FUNCTION QUE DEVUELVE LABEL DE FORMULARIO
-function devuelveLabel($label){
+function devuelveLabel($label, $realForm = ""){
 	global $wpdb;
 	global $user;
 
@@ -86,6 +86,10 @@ function devuelveLabel($label){
 
 	//FORMULARIOS QUE QUEREMOS RELACIONAR 
 	$formulariosR = $formularioSub;
+
+	if($realForm != ""){
+		$formulariosR = $realForm;
+	}
 
 	//ARREGLO QUE RECORREREMOS SEGUN EL FORMULARIO
 	$datosForm = [];
@@ -98,7 +102,7 @@ function devuelveLabel($label){
 
 	//EN ESTE VAMOS A TRAER LOS DATOS DEL FORMULARIO
 	//SACAMOS EL NOMBRE DEL USUARIO
-	$nombreSuser = $wpdb->get_results("SELECT display_meta FROM {$wpdb->prefix}rg_form_meta WHERE form_id = ".$formulariosR." ");
+	$nombreSuser = $wpdb->get_results("SELECT display_meta FROM {$wpdb->prefix}gf_form_meta WHERE form_id = ".$formulariosR." ");
 
 	//echo "SELECT value FROM wp_2_rg_lead_detail WHERE lead_id = ".$_GET['id']." AND form_id = 12 AND field_number = $formulariosR ";
 

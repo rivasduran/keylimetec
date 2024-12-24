@@ -7,7 +7,8 @@
 function crearJugadorJ($userId, $datosJugador, $idRed = ""){
 	//echo "<h1>Aqui si llega: ".$userId."</h1>";
 	//VARIABLES NECESARIAS PARA EL INSERT
-	date_default_timezone_set('UTC-5');
+	// date_default_timezone_set('UTC-5');
+  date_default_timezone_set('America/Panama');
 	$diaHoy = date("Y-m-d");
 
 	#h:i:s
@@ -50,7 +51,7 @@ function crearJugadorJ($userId, $datosJugador, $idRed = ""){
 
 	//CONSULTO EL ID TANTO DE LA TEMPORADA COMO DE LA COMPETICION
     if(strpos($competicionJ, "-") === false){
-    	$competicionJ2 = $wpdb->get_results("SELECT * FROM wp_{$idRed}_terms WHERE name = '".$competicionJ."'");
+    	$competicionJ2 = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}{$idRed}_terms WHERE name = '".$competicionJ."'");
     	foreach ($competicionJ2 as $key) {
     		$competicionJ = $key->term_id;
     	}
@@ -58,7 +59,7 @@ function crearJugadorJ($userId, $datosJugador, $idRed = ""){
 
 	//echo "<h1>Compericion = ".$competicionJ."</h1>";
 
-	$temporadaJ2 = $wpdb->get_results("SELECT * FROM wp_{$idRed}_terms WHERE name = '".$temporadaJ."'");
+	$temporadaJ2 = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}{$idRed}_terms WHERE name = '".$temporadaJ."'");
 	foreach ($temporadaJ2 as $key) {
 		$temporadaJ = $key->term_id;
 	}
@@ -77,7 +78,7 @@ function crearJugadorJ($userId, $datosJugador, $idRed = ""){
 	//DB DONDE ESTA PARADO WORDPRESS
 	//$tablaDB = "{$wpdb->prefix}posts";
 	//TABLA DONDE SE MONTARA EL EVENTO
-	$tablaDB = "wp_{$idRed}_posts";
+	$tablaDB = "{$wpdb->prefix}{$idRed}_posts";
 	$wpdb->insert(
                 $tablaDB,
                 array(
@@ -88,273 +89,271 @@ function crearJugadorJ($userId, $datosJugador, $idRed = ""){
                     'post_title'				=>	$nombreCompleto,
                     'post_excerpt'				=>	'',
                     'post_status'				=>	'publish',
-                    'comment_status'			=>	'closed',
-                    'ping_status'				=>	'closed',
-                    'post_password'				=>	'',
-                    'post_name'					=>	$nombreJugadorCorregir,
-					'to_ping'					=>	'',
-					'pinged'					=>	'',
-					'post_modified'				=>	$formatoDia,
-					'post_modified_gmt'			=>	$formatoDia,
-					'post_content_filtered'		=>	'',
-					'post_parent'				=>	'0',
-					'guid'						=>	'',
-					'menu_order'				=>	'0',
-					'post_type'					=>	'sp_player',
-					'post_mime_type'			=>	'',
-					'comment_count'				=>	'0'
-                  )
-                );
-
-	if(count($wpdb->insert_id) > 0){
-		//MODIFICAMOS LA RUTA DEL JUGADOR
-		$idJugador = $wpdb->insert_id;
-
-		//echo "<h1>El id del jugador es: ".$idJugador."</h1>";
-
-		//$rutaLiga = "http://localhost/primerplugin/?post_type=sp_player&#038;p=".$idJugador;//ESTO SE DEBE CORREGUIR CON LA RUTA REAL DEL CLIENTE
-		//http://jleague.keylimetest.com/football-masculino/?post_type=sp_player&#038;p=
-        $rutaLiga = "http://jleague.keylimetest.com/liga-jleague/?post_type=sp_player&#038;p=".$idJugador;
-        if($idRed == 7){
-            $rutaLiga = "http://jleague.keylimetest.com/liga-jleague/?post_type=sp_player&#038;p=".$idJugador;
-        }else if($idRed == 8){
-            $rutaLiga = "http://jleague.keylimetest.com/liga-pro/?post_type=sp_player&#038;p=".$idJugador;
-        }else{
-            $rutaLiga = "http://jleague.keylimetest.com/liga-jleague/?post_type=sp_player&#038;p=".$idJugador;
-        }
-
-		//MODIFICAMOS EL JUGADOR CREADO PARA PODER MODIFICAR SU PROPIA RUTA
-		$wpdb->update( 
-                  $tablaDB, 
-                  array( 
-                    'guid' => $rutaLiga 
-                  ), 
-                  array( 
-                    'ID' => $idJugador
-                    ) 
-                );
-
-		//YA CON LA RUTA O UR DEL JUGADOR PROCEDEMOS A REALIZAR TODAS LAS RELACIONES DEL CLIENTE
-
-		//wp_postmeta
-		#_edit_last  1
-
-		$wpdb->insert(
-                "wp_{$idRed}_postmeta",
-                array(
-                    'post_id' 				=>	$idJugador,
-                    'meta_key'				=>	'_edit_last',
-                    'meta_value'			=>	'1'
-                  )
-                );
-
-		#sp_twitter  ''
-		$wpdb->insert(
-                "wp_{$idRed}_postmeta",
-                array(
-                    'post_id' 				=>	$idJugador,
-                    'meta_key'				=>	'sp_twitter',
-                    'meta_value'			=>	''
-                  )
-                );
-
-		#sp_number  Numero de la camiseta
-		$wpdb->insert(
-                "wp_{$idRed}_postmeta",
-                array(
-                    'post_id' 				=>	$idJugador,
-                    'meta_key'				=>	'sp_number',
-                    'meta_value'			=>	$dorsalJ
-                  )
-                );
-
-		#sp_metrics  a:2:{s:6:"height";s:0:"";s:6:"weight";s:0:"";}
-		$metricasJugador = 'a:2:{s:6:"height";s:0:"";s:6:"weight";s:0:"";}';
-
-		$wpdb->insert(
-                "wp_{$idRed}_postmeta",
-                array(
-                    'post_id' 				=>	$idJugador,
-                    'meta_key'				=>	'sp_metrics',
-                    'meta_value'			=>	$metricasJugador
-                  )
-                );
-
-		//DEBEMOS CONSULTAR LA TEMPORADA Y LA COMPETICION DE ESTE EQUIPO
-		// ----> ESTE ES PARA PODER VER QUE CATEGORIAS SON wp_term_taxonomy
-		//ESTAMOS BUSCANDO EL ID DEL POST 72
-		//SELECT rela.*, term.*, tax.* FROM wp_term_relationships AS rela , wp_terms AS term, wp_term_taxonomy AS tax WHERE rela.object_id = 72 AND term.term_id = rela.term_taxonomy_id AND term.term_id = tax.term_id
-
-		#sp_leagues  a:2:{i:3;a:1:{i:2;s:3:"146";}i:0;a:1:{i:2;s:1:"1";}}
-					       //a:2:{i:10;a:1:{i:11;s:4:"3432";}i:0;a:1:{i:11;s:1:"1";}}
-		//a:2:{i:$competicion;a:1:{i:$temporada;s:4:"$equipoJ";}i:0;a:1:{i:$temporada;s:1:"1";}}
-
-		//AQUI DEBEMOS CONSEGUIR LA COMPETICION Y TEMPORADA DEL EQUIPO
-		//$competicionJ
-		//$temporadaJ
-		
-        //REVISAREMOS SI SON 2 O SOLO ES UNA
-        if(strpos($backCompeticion, "-") != false){
-            $competi = explode(" - ", $backCompeticion);
-
-            $backTemporada = $competicionJ;
-
-            for ($isst=0; $isst <= count($competi); $isst++) { 
-
-                $temporadaJ2 = $wpdb->get_results("SELECT * FROM wp_{$idRed}_terms WHERE name = '".$competi[$isst]."'");
-                foreach ($temporadaJ2 as $key) {
-                    $competicionJ = $key->term_id;
-                }
-
-                $ligaDeljugador = 'a:2:{i:'.$competicionJ.';a:1:{i:'.$temporadaJ.';s:4:"'.$equipoJ.'";}i:0;a:1:{i:'.$temporadaJ.';s:1:"1";}}';
-
-                //$ligaDeljugador = 'a:1:{i:0;a:1:{i:'.$temporadaJ.';s:1:"1";}}';
-                $wpdb->insert(
-                        "wp_{$idRed}_postmeta",
-                        array(
-                            'post_id'               =>  $idJugador,
-                            'meta_key'              =>  'sp_leagues',
-                            'meta_value'            =>  $ligaDeljugador
-                          )
-                        );
-            }
-
-
-
-        }else{
-            $ligaDeljugador = 'a:2:{i:'.$competicionJ.';a:1:{i:'.$temporadaJ.';s:4:"'.$equipoJ.'";}i:0;a:1:{i:'.$temporadaJ.';s:1:"1";}}';
-
-            $wpdb->insert(
-                    "wp_{$idRed}_postmeta",
-                    array(
-                        'post_id'               =>  $idJugador,
-                        'meta_key'              =>  'sp_leagues',
-                        'meta_value'            =>  $ligaDeljugador
-                      )
+                    'comment_status'        =>  'closed',
+                    'ping_status'           =>  'closed',
+                    'post_password'         =>  '',
+                    'post_name'             =>  $nombreJugadorCorregir,
+                    'to_ping'               =>  '',
+                    'pinged'                =>  '',
+                    'post_modified'         =>  $formatoDia,
+                    'post_modified_gmt'     =>  $formatoDia,
+                    'post_content_filtered' =>  '',
+                    'post_parent'           =>  '0',
+                    'guid'                  =>  '',
+                    'menu_order'            =>  '0',
+                    'post_type'             =>  'sp_player',
+                    'post_mime_type'        =>  '',
+                    'comment_count'         =>  '0'
+                    )
                     );
-        }
 
-		#sp_statistics  a:2:{i:3;a:2:{i:0;a:8:{s:5:"goals";s:0:"";s:7:"assists";s:0:"";s:11:"yellowcards";s:0:"";s:8:"redcards";s:0:"";s:11:"appearances";s:0:"";s:8:"winratio";s:0:"";s:9:"drawratio";s:0:"";s:9:"lossratio";s:0:"";}i:2;a:8:{s:5:"goals";s:0:"";s:7:"assists";s:0:"";s:11:"yellowcards";s:0:"";s:8:"redcards";s:0:"";s:11:"appearances";s:0:"";s:8:"winratio";s:0:"";s:9:"drawratio";s:0:"";s:9:"lossratio";s:0:"";}}i:0;a:2:{i:0;a:8:{s:5:"goals";s:0:"";s:7:"assists";s:0:"";s:11:"yellowcards";s:0:"";s:8:"redcards";s:0:"";s:11:"appearances";s:0:"";s:8:"winratio";s:0:"";s:9:"drawratio";s:0:"";s:9:"lossratio";s:0:"";}i:2;a:8:{s:5:"goals";s:0:"";s:7:"assists";s:0:"";s:11:"yellowcards";s:0:"";s:8:"redcards";s:0:"";s:11:"appearances";s:0:"";s:8:"winratio";s:0:"";s:9:"drawratio";s:0:"";s:9:"lossratio";s:0:"";}}}
-		$statistJugador = 'a:2:{i:3;a:2:{i:0;a:8:{s:5:"goals";s:0:"";s:7:"assists";s:0:"";s:11:"yellowcards";s:0:"";s:8:"redcards";s:0:"";s:11:"appearances";s:0:"";s:8:"winratio";s:0:"";s:9:"drawratio";s:0:"";s:9:"lossratio";s:0:"";}i:2;a:8:{s:5:"goals";s:0:"";s:7:"assists";s:0:"";s:11:"yellowcards";s:0:"";s:8:"redcards";s:0:"";s:11:"appearances";s:0:"";s:8:"winratio";s:0:"";s:9:"drawratio";s:0:"";s:9:"lossratio";s:0:"";}}i:0;a:2:{i:0;a:8:{s:5:"goals";s:0:"";s:7:"assists";s:0:"";s:11:"yellowcards";s:0:"";s:8:"redcards";s:0:"";s:11:"appearances";s:0:"";s:8:"winratio";s:0:"";s:9:"drawratio";s:0:"";s:9:"lossratio";s:0:"";}i:2;a:8:{s:5:"goals";s:0:"";s:7:"assists";s:0:"";s:11:"yellowcards";s:0:"";s:8:"redcards";s:0:"";s:11:"appearances";s:0:"";s:8:"winratio";s:0:"";s:9:"drawratio";s:0:"";s:9:"lossratio";s:0:"";}}}';
+      if($wpdb->insert_id > 0){
+          //MODIFICAMOS LA RUTA DEL JUGADOR
+          $idJugador = $wpdb->insert_id;
 
-		$wpdb->insert(
-                "wp_{$idRed}_postmeta",
-                array(
-                    'post_id' 				=>	$idJugador,
-                    'meta_key'				=>	'sp_leagues',
-                    'meta_value'			=>	$statistJugador
-                  )
-                );
+          //echo "<h1>El id del jugador es: ".$idJugador."</h1>";
 
-		#slide_template  default
+          //$rutaLiga = "http://localhost/primerplugin/?post_type=sp_player&#038;p=".$idJugador;//ESTO SE DEBE CORREGUIR CON LA RUTA REAL DEL CLIENTE
+          //http://jleague.keylimetest.com/football-masculino/?post_type=sp_player&#038;p=
+          $rutaLiga = "http://jleague.keylimetest.com/liga-jleague/?post_type=sp_player&#038;p=".$idJugador;
+          if($idRed == 7){
+              $rutaLiga = "http://jleague.keylimetest.com/liga-jleague/?post_type=sp_player&#038;p=".$idJugador;
+          }else if($idRed == 8){
+              $rutaLiga = "http://jleague.keylimetest.com/liga-pro/?post_type=sp_player&#038;p=".$idJugador;
+          }else{
+              $rutaLiga = "http://jleague.keylimetest.com/liga-jleague/?post_type=sp_player&#038;p=".$idJugador;
+          }
 
-		$wpdb->insert(
-                "wp_{$idRed}_postmeta",
-                array(
-                    'post_id' 				=>	$idJugador,
-                    'meta_key'				=>	'slide_template',
-                    'meta_value'			=>	'default'
-                  )
-                );
+          //MODIFICAMOS EL JUGADOR CREADO PARA PODER MODIFICAR SU PROPIA RUTA
+          $wpdb->update( 
+                    $tablaDB, 
+                    array( 
+                      'guid' => $rutaLiga 
+                    ), 
+                    array( 
+                      'ID' => $idJugador
+                      ) 
+                  );
 
-		#sp_nationality  ''
+          //YA CON LA RUTA O UR DEL JUGADOR PROCEDEMOS A REALIZAR TODAS LAS RELACIONES DEL CLIENTE
 
-		$wpdb->insert(
-                "wp_{$idRed}_postmeta",
-                array(
-                    'post_id' 				=>	$idJugador,
-                    'meta_key'				=>	'sp_nationality',
-                    'meta_value'			=>	''
-                  )
-                );
+          //wp_postmeta
+          #_edit_last  1
 
-		#sp_current_team  dependiendo del ID del equipo
+          $wpdb->insert(
+                  "{$wpdb->prefix}{$idRed}_postmeta",
+                  array(
+                      'post_id'               =>  $idJugador,
+                      'meta_key'              =>  '_edit_last',
+                      'meta_value'            =>  '1'
+                    )
+                  );
 
-		$wpdb->insert(
-                "wp_{$idRed}_postmeta",
-                array(
-                    'post_id' 				=>	$idJugador,
-                    'meta_key'				=>	'sp_current_team',
-                    'meta_value'			=>	$equipoJ
-                  )
-                );
+          #sp_twitter  ''
+          $wpdb->insert(
+                  "{$wpdb->prefix}{$idRed}_postmeta",
+                  array(
+                      'post_id'               =>  $idJugador,
+                      'meta_key'              =>  'sp_twitter',
+                      'meta_value'            =>  ''
+                    )
+                  );
 
-		#sp_team  dependiendo del ID del equipo
+          #sp_number  Numero de la camiseta
+          $wpdb->insert(
+                  "{$wpdb->prefix}{$idRed}_postmeta",
+                  array(
+                      'post_id'               =>  $idJugador,
+                      'meta_key'              =>  'sp_number',
+                      'meta_value'            =>  $dorsalJ
+                    )
+                  );
 
-		$wpdb->insert(
-                "wp_{$idRed}_postmeta",
-                array(
-                    'post_id' 				=>	$idJugador,
-                    'meta_key'				=>	'sp_team',
-                    'meta_value'			=>	$equipoJ
-                  )
-                );
+          #sp_metrics  a:2:{s:6:"height";s:0:"";s:6:"weight";s:0:"";}
+          $metricasJugador = 'a:2:{s:6:"height";s:0:"";s:6:"weight";s:0:"";}';
+
+          $wpdb->insert(
+                  "{$wpdb->prefix}{$idRed}_postmeta",
+                  array(
+                      'post_id'               =>  $idJugador,
+                      'meta_key'              =>  'sp_metrics',
+                      'meta_value'            =>  $metricasJugador
+                    )
+                  );
+
+          //DEBEMOS CONSULTAR LA TEMPORADA Y LA COMPETICION DE ESTE EQUIPO
+          // ----> ESTE ES PARA PODER VER QUE CATEGORIAS SON wp_term_taxonomy
+          //ESTAMOS BUSCANDO EL ID DEL POST 72
+          //SELECT rela.*, term.*, tax.* FROM wp_term_relationships AS rela , wp_terms AS term, wp_term_taxonomy AS tax WHERE rela.object_id = 72 AND term.term_id = rela.term_taxonomy_id AND term.term_id = tax.term_id
+
+          #sp_leagues  a:2:{i:3;a:1:{i:2;s:3:"146";}i:0;a:1:{i:2;s:1:"1";}}
+                              //a:2:{i:10;a:1:{i:11;s:4:"3432";}i:0;a:1:{i:11;s:1:"1";}}
+          //a:2:{i:$competicion;a:1:{i:$temporada;s:4:"$equipoJ";}i:0;a:1:{i:$temporada;s:1:"1";}}
+
+          //AQUI DEBEMOS CONSEGUIR LA COMPETICION Y TEMPORADA DEL EQUIPO
+          //$competicionJ
+          //$temporadaJ
+          
+          //REVISAREMOS SI SON 2 O SOLO ES UNA
+          if(strpos($backCompeticion, "-") !== false){
+              $competi = explode(" - ", $backCompeticion);
+
+              $backTemporada = $competicionJ;
+
+              for ($isst=0; $isst < count($competi); $isst++) { 
+
+                  $temporadaJ2 = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}{$idRed}_terms WHERE name = '".$competi[$isst]."'");
+                  foreach ($temporadaJ2 as $key) {
+                      $competicionJ = $key->term_id;
+                  }
+
+                  $ligaDeljugador = 'a:2:{i:'.$competicionJ.';a:1:{i:'.$temporadaJ.';s:4:"'.$equipoJ.'";}i:0;a:1:{i:'.$temporadaJ.';s:1:"1";}}';
+
+                  //$ligaDeljugador = 'a:1:{i:0;a:1:{i:'.$temporadaJ.';s:1:"1";}}';
+                  $wpdb->insert(
+                          "{$wpdb->prefix}{$idRed}_postmeta",
+                          array(
+                              'post_id'               =>  $idJugador,
+                              'meta_key'              =>  'sp_leagues',
+                              'meta_value'            =>  $ligaDeljugador
+                            )
+                          );
+              }
+
+          }else{
+              $ligaDeljugador = 'a:2:{i:'.$competicionJ.';a:1:{i:'.$temporadaJ.';s:4:"'.$equipoJ.'";}i:0;a:1:{i:'.$temporadaJ.';s:1:"1";}}';
+
+              $wpdb->insert(
+                      "{$wpdb->prefix}{$idRed}_postmeta",
+                      array(
+                          'post_id'               =>  $idJugador,
+                          'meta_key'              =>  'sp_leagues',
+                          'meta_value'            =>  $ligaDeljugador
+                        )
+                      );
+          }
+
+          #sp_statistics  a:2:{i:3;a:2:{i:0;a:8:{s:5:"goals";s:0:"";s:7:"assists";s:0:"";s:11:"yellowcards";s:0:"";s:8:"redcards";s:0:"";s:11:"appearances";s:0:"";s:8:"winratio";s:0:"";s:9:"drawratio";s:0:"";s:9:"lossratio";s:0:"";}i:2;a:8:{s:5:"goals";s:0:"";s:7:"assists";s:0:"";s:11:"yellowcards";s:0:"";s:8:"redcards";s:0:"";s:11:"appearances";s:0:"";s:8:"winratio";s:0:"";s:9:"drawratio";s:0:"";s:9:"lossratio";s:0:"";}}i:0;a:2:{i:0;a:8:{s:5:"goals";s:0:"";s:7:"assists";s:0:"";s:11:"yellowcards";s:0:"";s:8:"redcards";s:0:"";s:11:"appearances";s:0:"";s:8:"winratio";s:0:"";s:9:"drawratio";s:0:"";s:9:"lossratio";s:0:"";}i:2;a:8:{s:5:"goals";s:0:"";s:7:"assists";s:0:"";s:11:"yellowcards";s:0:"";s:8:"redcards";s:0:"";s:11:"appearances";s:0:"";s:8:"winratio";s:0:"";s:9:"drawratio";s:0:"";s:9:"lossratio";s:0:"";}}}
+          $statistJugador = 'a:2:{i:3;a:2:{i:0;a:8:{s:5:"goals";s:0:"";s:7:"assists";s:0:"";s:11:"yellowcards";s:0:"";s:8:"redcards";s:0:"";s:11:"appearances";s:0:"";s:8:"winratio";s:0:"";s:9:"drawratio";s:0:"";s:9:"lossratio";s:0:"";}i:2;a:8:{s:5:"goals";s:0:"";s:7:"assists";s:0:"";s:11:"yellowcards";s:0:"";s:8:"redcards";s:0:"";s:11:"appearances";s:0:"";s:8:"winratio";s:0:"";s:9:"drawratio";s:0:"";s:9:"lossratio";s:0:"";}}i:0;a:2:{i:0;a:8:{s:5:"goals";s:0:"";s:7:"assists";s:0:"";s:11:"yellowcards";s:0:"";s:8:"redcards";s:0:"";s:11:"appearances";s:0:"";s:8:"winratio";s:0:"";s:9:"drawratio";s:0:"";s:9:"lossratio";s:0:"";}i:2;a:8:{s:5:"goals";s:0:"";s:7:"assists";s:0:"";s:11:"yellowcards";s:0:"";s:8:"redcards";s:0:"";s:11:"appearances";s:0:"";s:8:"winratio";s:0:"";s:9:"drawratio";s:0:"";s:9:"lossratio";s:0:"";}}}';
+
+          $wpdb->insert(
+                  "{$wpdb->prefix}{$idRed}_postmeta",
+                  array(
+                      'post_id'               =>  $idJugador,
+                      'meta_key'              =>  'sp_leagues',
+                      'meta_value'            =>  $statistJugador
+                    )
+                  );
+
+          #slide_template  default
+
+          $wpdb->insert(
+                  "{$wpdb->prefix}{$idRed}_postmeta",
+                  array(
+                      'post_id'               =>  $idJugador,
+                      'meta_key'              =>  'slide_template',
+                      'meta_value'            =>  'default'
+                    )
+                  );
+
+          #sp_nationality  ''
+
+          $wpdb->insert(
+                  "{$wpdb->prefix}{$idRed}_postmeta",
+                  array(
+                      'post_id'               =>  $idJugador,
+                      'meta_key'              =>  'sp_nationality',
+                      'meta_value'            =>  ''
+                    )
+                  );
+
+          #sp_current_team  dependiendo del ID del equipo
+
+          $wpdb->insert(
+                  "{$wpdb->prefix}{$idRed}_postmeta",
+                  array(
+                      'post_id'               =>  $idJugador,
+                      'meta_key'              =>  'sp_current_team',
+                      'meta_value'            =>  $equipoJ
+                    )
+                  );
+
+          #sp_team  dependiendo del ID del equipo
+
+          $wpdb->insert(
+                  "{$wpdb->prefix}{$idRed}_postmeta",
+                  array(
+                      'post_id'               =>  $idJugador,
+                      'meta_key'              =>  'sp_team',
+                      'meta_value'            =>  $equipoJ
+                    )
+                  );
 
 
-		#RELACIONANDO EL JUGADOR CON LA TEMPORADA Y CON EL EQUIPO
-        //df_tags
-        $wpdb->insert(
-            "{$wpdb->prefix}df_tags",
-            array(
-                'tags'             =>  'JOSER 2',
-                'value'      =>  $competicionJ
-              )
-            );
+          #RELACIONANDO EL JUGADOR CON LA TEMPORADA Y CON EL EQUIPO
+          //df_tags
+          $wpdb->insert(
+              "{$wpdb->prefix}df_tags",
+              array(
+                  'tags'             =>  'JOSER 2',
+                  'value'      =>  $competicionJ
+                )
+              );
 
 
-        if(strpos($backCompeticion, "-") != false){
-            $competi = explode(" - ", $backCompeticion);
+          if(strpos($backCompeticion, "-") !== false){
+              $competi = explode(" - ", $backCompeticion);
 
-            $backTemporada = $competicionJ;
+              $backTemporada = $competicionJ;
 
-            for ($isst=0; $isst <= count($competi); $isst++) { 
+              for ($isst=0; $isst < count($competi); $isst++) { 
 
-                $temporadaJ2 = $wpdb->get_results("SELECT * FROM wp_{$idRed}_terms WHERE name = '".$competi[$isst]."'");
-                foreach ($temporadaJ2 as $key) {
-                    $competicionJ = $key->term_id;
-                }
+                  $temporadaJ2 = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}{$idRed}_terms WHERE name = '".$competi[$isst]."'");
+                  foreach ($temporadaJ2 as $key) {
+                      $competicionJ = $key->term_id;
+                  }
 
-                $wpdb->insert(
-                        "wp_{$idRed}_term_relationships",
-                        array(
-                            'object_id'             =>  $idJugador,
-                            'term_taxonomy_id'      =>  $competicionJ,
-                            'term_order'            =>  '0'
-                          )
-                        );
+                  $wpdb->insert(
+                          "{$wpdb->prefix}{$idRed}_term_relationships",
+                          array(
+                              'object_id'             =>  $idJugador,
+                              'term_taxonomy_id'      =>  $competicionJ,
+                              'term_order'            =>  '0'
+                            )
+                          );
 
-                $wpdb->insert(
-                        "{$wpdb->prefix}df_tags",
-                        array(
-                            'tags'             =>  'JOSER 3',
-                            'value'      =>  $competicionJ
-                          )
-                        );
+                  $wpdb->insert(
+                          "{$wpdb->prefix}df_tags",
+                          array(
+                              'tags'             =>  'JOSER 3',
+                              'value'      =>  $competicionJ
+                            )
+                          );
 
-            }
+              }
 
-        }else{
-    		$wpdb->insert(
-                    "wp_{$idRed}_term_relationships",
-                    array(
-                        'object_id'				=>	$idJugador,
-                        'term_taxonomy_id'		=>	$competicionJ,
-                        'term_order'			=>	'0'
-                      )
-                    );
-        }
+          }else{
+              $wpdb->insert(
+                      "{$wpdb->prefix}{$idRed}_term_relationships",
+                      array(
+                          'object_id'             =>  $idJugador,
+                          'term_taxonomy_id'      =>  $competicionJ,
+                          'term_order'            =>  '0'
+                        )
+                      );
+          }
 
-		$wpdb->insert(
-                "wp_{$idRed}_term_relationships",
-                array(
-                    'object_id'				=>	$idJugador,
-                    'term_taxonomy_id'		=>	$temporadaJ,
-                    'term_order'			=>	'0'
-                  )
-                );
+          $wpdb->insert(
+                  "{$wpdb->prefix}{$idRed}_term_relationships",
+                  array(
+                      'object_id'             =>  $idJugador,
+                      'term_taxonomy_id'      =>  $temporadaJ,
+                      'term_order'            =>  '0'
+                    )
+                  );
 
-		//echo "<h1>".$competicionJ." ".$temporadaJ."</h1>";
-	}else{
-		//echo "<h1>No se creo el jugador adecuadamente, por favor contactar al administrador</h1>";
-	}
-}
+          //echo "<h1>".$competicionJ." ".$temporadaJ."</h1>";
+      }else{
+          //echo "<h1>No se creo el jugador adecuadamente, por favor contactar al administrador</h1>";
+      }
+    }
