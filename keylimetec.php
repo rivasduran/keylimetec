@@ -1252,7 +1252,18 @@ function agregaModificaMetrics_final($arregloMetrics = ""){
 
   $foRelleno = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}rg_lead_detail WHERE value = '".$user->user_email."' ORDER BY id DESC LIMIT 1 ");
 
+  // echo "<h1>SELECT * FROM {$wpdb->prefix}rg_lead_detail WHERE value = '".$user->user_email."' ORDER BY id DESC LIMIT 1  </h1>";
+
   //echo "<h1>SELECT * FROM {$wpdb->prefix}rg_lead_detail WHERE value = {$user->user_email} ORDER BY id DESC LIMIT 1 </h1>";
+
+  if(count($foRelleno) > 0){
+    $gravityFormsNuevoOViejo = 0;
+  }else{
+    $gravityFormsNuevoOViejo = 1;
+    $foRelleno = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}gf_entry_meta WHERE meta_value = '".$user->user_email."' ORDER BY id DESC LIMIT 1 ");
+
+    // echo "<h1>SELECT * FROM {$wpdb->prefix}gf_entry_meta WHERE meta_value = '".$user->user_email."' ORDER BY id DESC LIMIT 1 </h1>";
+  }
 
   foreach ($foRelleno as $keyt) {
     $miFormulario = $keyt->form_id;
@@ -1262,7 +1273,7 @@ function agregaModificaMetrics_final($arregloMetrics = ""){
     $miFormulario = 18;
   }
 
-  //echo "<h1>------> {$miFormulario}</h1>";
+  // echo "<h1>------> {$miFormulario}</h1>";
 
   $seImporto = 0;
 
@@ -1317,12 +1328,12 @@ function agregaModificaMetrics_final($arregloMetrics = ""){
     //relacionMetas($con3['display_meta']);
     //echo "<br>/<br>";
 
-    //echo "<h1>DISPLAY META -> ".$atributoss->display_meta."</h1>";
+    // echo "<h1>DISPLAY META -> ".$atributoss->display_meta."</h1>";
 
     array_push($momentaneo, $miFormulario);
     array_push($momentaneo, relacionMetas($atributoss->display_meta));
 
-    //echo "<h1>".relacionMetas($atributoss->display_meta)."</h1>";
+    // echo "<h1>".json_encode(relacionMetas($atributoss->display_meta))."</h1>";
 
     //GUARDANDO LA DATA EN EL ARREGLO DE FORMULARIO
     array_push($datosForm, $momentaneo);
@@ -1346,62 +1357,73 @@ function agregaModificaMetrics_final($arregloMetrics = ""){
 
         if($pos > 0){
           
-
+          // echo "<h1>Estamos pasando por el primero</h1>";
           $busqueda = substr($datosForm[$i][1][$u][0], 0, $pos);//ESTO ERA SOLO PARA ELIMINAR EL . (REVISAR)
 
           //$busqueda = $datosForm[$i][1][$u][0];
 
-          //echo "<h1>".$pos." ".$busqueda."</h1>";
+          // echo "<h1>".$pos." ".$busqueda."</h1>";
         }else{
+          // echo "<h1>Estamos pasando por el segundo</h1>";
           $busqueda = $datosForm[$i][1][$u][0];
 
-          //echo "<h3>".$busqueda."</h3>";
+          // echo "<h3>".$busqueda."</h3>";
         }
 
         //echo "<h1>{$busqueda}</h1>";
 
         //echo "<h1>".$user->user_email."</h1>";
 
-        $ultimaInscripcion = $wpdb->get_results("SELECT f.lead_id AS lead_id FROM {$wpdb->prefix}rg_lead_detail AS f WHERE f.form_id = ".$datosForm[$i][0]." AND value = '".$user->user_email."' ORDER BY f.id DESC LIMIT 1");
+        // $ultimaInscripcion = $wpdb->get_results("SELECT f.lead_id AS lead_id FROM {$wpdb->prefix}rg_lead_detail AS f WHERE f.form_id = ".$datosForm[$i][0]." AND value = '".$user->user_email."' ORDER BY f.id DESC LIMIT 1");
+        $ultimaInscripcion = $wpdb->get_results("SELECT f.entry_id AS lead_id FROM {$wpdb->prefix}gf_entry_meta AS f WHERE f.form_id = ".$datosForm[$i][0]." AND f.meta_value = '".$user->user_email."' ORDER BY f.id DESC LIMIT 1");
 
-        //echo "<h1>SELECT f.lead_id AS lead_id FROM {$wpdb->prefix}rg_lead_detail AS f WHERE f.form_id = ".$datosForm[$i][0]." AND f.field_number = ".$busqueda." AND value = '".$user->user_email."' ORDER BY f.id DESC LIMIT 1</h1>";
+        // echo "<h1>SELECT f.entry_id AS lead_id FROM {$wpdb->prefix}gf_entry_meta AS f WHERE f.form_id = ".$datosForm[$i][0]." AND f.meta_value = '".$user->user_email."' ORDER BY f.id DESC LIMIT 1</h1>";
+        // echo "<h1>SELECT f.lead_id AS lead_id FROM {$wpdb->prefix}rg_lead_detail AS f WHERE f.form_id = ".$datosForm[$i][0]." AND f.field_number = ".$busqueda." AND value = '".$user->user_email."' ORDER BY f.id DESC LIMIT 1</h1>";
         $idInscripcion = 0;
         foreach ($ultimaInscripcion as $keys) {
           //echo "jajajjaa";
           $idInscripcion = $keys->lead_id;
         }
 
-        //echo "<h1>{$idInscripcion}</h1>";
+        // echo "<h1>ID INSCRIPCION: {$idInscripcion}</h1>";
 
         //$datosHijos = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}rg_lead_detail AS f WHERE f.form_id = ".$datosForm[$i][0]." AND f.field_number = ".$busqueda." ORDER BY f.id DESC LIMIT 1");
         //$datosHijos = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}rg_lead_detail AS f WHERE f.form_id = ".$datosForm[$i][0]." AND f.field_number = ".$busqueda." AND f.lead_id = ".$idInscripcion." ORDER BY f.id DESC LIMIT 1");
-        $datosHijos = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}rg_lead_detail AS f WHERE f.form_id = ".$datosForm[$i][0]." AND f.lead_id = ".$idInscripcion." ");
+        // $datosHijos = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}rg_lead_detail AS f WHERE f.form_id = ".$datosForm[$i][0]." AND f.lead_id = ".$idInscripcion." ");
+        $datosHijos = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}gf_entry_meta AS f WHERE f.form_id = ".$datosForm[$i][0]." AND f.entry_id = ".$idInscripcion." ");
+
+        // echo "<h1>SELECT * FROM {$wpdb->prefix}gf_entry_meta AS f WHERE f.form_id = ".$datosForm[$i][0]." AND f.entry_id = ".$idInscripcion." </h1>";
 
         //echo "<h1> SELECT * FROM {$wpdb->prefix}rg_lead_detail AS f WHERE f.form_id = ".$datosForm[$i][0]." AND f.field_number = ".$busqueda." AND f.lead_id = ".$idInscripcion." ORDER BY f.id DESC LIMIT 1 </h1>";
 
         $queAtributo = "";
         foreach ($datosHijos as $atributoss) {
+          // print_r($atributoss);
           //echo "<h1>SELECT * FROM wp_2_rg_lead_detail AS f WHERE f.form_id = ".$datosForm[$i][0]." AND f.field_number = ".$datosForm[$i][1][$u][0]." ORDER BY f.id DESC LIMIT 1  --> ".$atributoss->value."</h1>";
-          $queAtributo = $atributoss->value;
+          // $queAtributo = $atributoss->value;
+          // TODO LA VERSION NUEVA NO ES VALUE SINO META VALUE
+          $queAtributo = $atributoss->meta_value;
           //echo "<h1> ".$queValor = devuelveLabel($atributoss->field_number)." ".$queAtributo."</h1>";
 
 
 
           $parametroE = $queAtributo;
+          // TODO ANTES ERA EL FIELD NUMBER AHORA ES EL META VKEY
+          $field_numberMetaKey = $atributoss->meta_key;
 
-          //echo "<h1>{$atributoss->field_number} {$parametroE}</h1>";
+          // echo "<h1>{$field_numberMetaKey} {$parametroE}</h1>";
 
-          //echo "<h1>".$atributoss->field_number."</h1>";
+          // echo "<h1> ===_====".$field_numberMetaKey." ||||| </h1>";
 
           //AQUI DEBEMOS LIMPIAR EL ID DEL PARAMETRO 17.6
 
           $cual = ".";
-          $posst = strpos($atributoss->field_number, $cual);
+          $posst = strpos($field_numberMetaKey, $cual);
           if($posst > 0){
             $field_numberA = "";
-            $field_numberA = substr($atributoss->field_number, 0, $posst);
+            $field_numberA = substr($field_numberMetaKey, 0, $posst);
           }else{
-            $field_numberA = $atributoss->field_number;
+            $field_numberA = $field_numberMetaKey;
           }
 
           
